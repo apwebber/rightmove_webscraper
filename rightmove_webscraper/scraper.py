@@ -242,7 +242,7 @@ class RightmoveData:
         results.reset_index(inplace=True, drop=True)
 
         # Convert price column to numeric type:
-        results["price"].replace(regex=True, inplace=True, to_replace=r"\D", value=r"")
+        results["price"] = results["price"].replace(regex=True, to_replace=r"\D", value=r"")
         results["price"] = pd.to_numeric(results["price"])
 
         # Extract short postcode area to a separate column:
