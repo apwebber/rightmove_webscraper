@@ -26,7 +26,7 @@ url = "https://www.rightmove.co.uk/property-for-sale/find.html?searchType=SALE&l
 rm = RightmoveData(url, results_fpath)
 
 # Access data
-data = rm.get_data()
+data = rm.get_results()
 
 # Or read the json file that was written
 import json
