@@ -9,3 +9,4 @@ build/
 !/docs
 .vscode
 .venv
+/tests/test_data/
