@@ -9,9 +9,7 @@ readme = "README.md"
 python = "^3.9"
 lxml = "^5.2.2"
 numpy = "^2.0.0"
-pandas = "^2.2.2"
 requests = "^2.32.3"
-sqlite-utils = "^3.36"
 
 
 [tool.poetry.group.dev.dependencies]
