@@ -11,11 +11,9 @@ def test_sale_residential():
     """Test a search on residential properties for sale."""
     url = f"{base_url}property-for-sale/find.html?searchType=SALE&locationIdentifier=REGION%5E94346&insId=1"
     rm = RightmoveData(url, 'tests/test_data/results.json')
-    assert isinstance(rm.average_price, float)
     assert isinstance(rm.get_results, list)
     assert len(rm.get_results) > 0
     assert isinstance(rm.page_count, int)
-    assert rm.rent_or_sale == "sale"
     assert isinstance(rm.results_count, int)
     assert isinstance(rm.results_count_display, int)
     assert url == rm.url
@@ -25,11 +23,9 @@ def test_rent_residential():
     """Test a search on residential properties for rent."""
     url = f"{base_url}property-to-rent/find.html?searchType=RENT&locationIdentifier=REGION%5E94346"
     rm = RightmoveData(url, 'tests/test_data/results.json')
-    assert isinstance(rm.average_price, float)
     assert isinstance(rm.get_results, list)
     assert len(rm.get_results) > 0
     assert isinstance(rm.page_count, int)
-    assert rm.rent_or_sale == "rent"
     assert isinstance(rm.results_count, int)
     assert isinstance(rm.results_count_display, int)
     assert url == rm.url
@@ -39,11 +35,9 @@ def test_sale_commercial():
     """Test a search on commercial properties for sale."""
     url = f"{base_url}commercial-property-for-sale/find.html?searchType=SALE&locationIdentifier=REGION%5E70417"
     rm = RightmoveData(url, 'tests/test_data/results.json')
-    assert isinstance(rm.average_price, float)
     assert isinstance(rm.get_results, list)
     assert len(rm.get_results) > 0
     assert isinstance(rm.page_count, int)
-    assert rm.rent_or_sale == "sale-commercial"
     assert isinstance(rm.results_count, int)
     assert isinstance(rm.results_count_display, int)
     assert url == rm.url
@@ -53,11 +47,9 @@ def test_rent_commercial():
     """Test a search on commercial properties for rent."""
     url = f"{base_url}commercial-property-to-let/find.html?searchType=RENT&locationIdentifier=REGION%5E70417"
     rm = RightmoveData(url, 'tests/test_data/results.json')
-    assert isinstance(rm.average_price, float)
     assert isinstance(rm.get_results, list)
     assert len(rm.get_results) > 0
     assert isinstance(rm.page_count, int)
-    assert rm.rent_or_sale == "rent-commercial"
     assert isinstance(rm.results_count, int)
     assert isinstance(rm.results_count_display, int)
     assert url == rm.url

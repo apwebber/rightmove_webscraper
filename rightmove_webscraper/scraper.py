@@ -76,31 +76,6 @@ class RightmoveData:
         be accessed to 42."""
         return len(self.get_results)
 
-    @property
-    def average_price(self):
-        """Average price of all results returned by `get_results` (ignoring
-        results which don't list a price)."""
-        # total = self.get_results["price"].dropna().sum()
-        prices = [float(x['price']['amount']) for x in self.get_results]
-        total = np.sum(prices)
-        return total / self.results_count
-
-
-
-    @property
-    def rent_or_sale(self):
-        """String specifying if the search is for properties for rent or sale.
-        Required because Xpaths are different for the target elements."""
-        if "/property-for-sale/" in self.url or "/new-homes-for-sale/" in self.url:
-            return "sale"
-        elif "/property-to-rent/" in self.url:
-            return "rent"
-        elif "/commercial-property-for-sale/" in self.url:
-            return "sale-commercial"
-        elif "/commercial-property-to-let/" in self.url:
-            return "rent-commercial"
-        else:
-            raise ValueError(f"Invalid rightmove URL:\n\n\t{self.url}")
 
     @property
     def results_count_display(self):
@@ -135,30 +110,7 @@ class RightmoveData:
         script = tree.xpath(data_sel)[0]
         data = json.loads(re.search(r"window.jsonModel = (.*?)$", script).group(1))
         return data['properties']
-        # properties = [flatten(x) for x in j['properties']]
 
-        # db = sqlite_utils.Database("properties.db")
-        # db["properties"].insert_all(
-        #     properties,
-        #     pk="id",
-        #     replace=True
-        # )
-
-        # print(db)
-
-        # # Store the data in a Pandas DataFrame:
-        # data = [price_pcm, titles, addresses, weblinks, agent_urls]
-        # data = data + [floorplan_urls] if get_floorplans else data
-        # temp_df = pd.DataFrame(data)
-        # temp_df = temp_df.transpose()
-        # columns = ["price", "type", "address", "url", "agent_url"]
-        # columns = columns + ["floorplan_url"] if get_floorplans else columns
-        # temp_df.columns = columns
-
-        # # Drop empty rows which come from placeholders in the html:
-        # temp_df = temp_df[temp_df["address"].notnull()]
-
-        # return temp_df
 
     def _get_results(self) -> list:
         """Build a Pandas DataFrame with all results returned by the search."""
@@ -184,35 +136,3 @@ class RightmoveData:
             json.dump(results, f)
 
         return results
-
-    # @staticmethod
-    # def _clean_results(results: pd.DataFrame):
-    #     # Reset the index:
-    #     results.reset_index(inplace=True, drop=True)
-
-    #     # Convert price column to numeric type:
-    #     results["price"] = results["price"].replace(regex=True, to_replace=r"\D", value=r"")
-    #     results["price"] = pd.to_numeric(results["price"])
-
-    #     # Extract short postcode area to a separate column:
-    #     pat = r"\b([A-Za-z][A-Za-z]?[0-9][0-9]?[A-Za-z]?)\b"
-    #     results["postcode"] = results["address"].astype(str).str.extract(pat, expand=True)[0]
-
-    #     # Extract full postcode to a separate column:
-    #     pat = r"([A-Za-z][A-Za-z]?[0-9][0-9]?[A-Za-z]?[0-9]?\s[0-9]?[A-Za-z][A-Za-z])"
-    #     results["full_postcode"] = results["address"].astype(str).str.extract(pat, expand=True)[0]
-
-    #     # Extract number of bedrooms from `type` to a separate column:
-    #     pat = r"\b([\d][\d]?)\b"
-    #     results["number_bedrooms"] = results["type"].astype(str).str.extract(pat, expand=True)[0]
-    #     results.loc[results["type"].str.contains("studio", case=False), "number_bedrooms"] = 0
-    #     results["number_bedrooms"] = pd.to_numeric(results["number_bedrooms"])
-
-    #     # Clean up annoying white spaces and newlines in `type` column:
-    #     results["type"] = results["type"].str.strip("\n").str.strip()
-
-    #     # Add column with datetime when the search was run (i.e. now):
-    #     now = datetime.datetime.now()
-    #     results["search_date"] = now
-
-    #     return results
