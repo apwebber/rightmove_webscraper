@@ -72,6 +72,10 @@ class RightmoveData:
     def get_results(self):
         """list of all results returned by the search."""
         return self._results
+    
+    @property
+    def get_detail_results(self):
+        return self._detail_results
 
     @property
     def results_count(self):
@@ -174,3 +178,5 @@ class RightmoveData:
 
         with open(fpath, 'w') as f:
             json.dump(results, f)
+
+        return results

@@ -71,6 +71,7 @@ def test_get_detail():
     url = f"{base_url}property-for-sale/find.html?searchType=SALE&locationIdentifier=REGION%5E94346&insId=1"
     rm = RightmoveData(url, 'tests/test_data/results.json',
                        detail_results_fpath='tests/test_data/detail.json', detail_threaded=True)
+    detail = rm.get_detail_results
 
 
 def test_parse_detail_data():
