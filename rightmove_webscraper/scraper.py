@@ -1,9 +1,13 @@
 import json
 import re
 from lxml import html
-import numpy as np
 import requests
+from concurrent.futures import ThreadPoolExecutor
+import time
 
+DETAIL_PAGE_PART = "https://www.rightmove.co.uk%s"
+PROPERTY_URL_JSON_KEY = 'propertyUrl'
+UA_HEADER = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
 
 class RightmoveData:
     """The `RightmoveData` webscraper collects structured data on properties
@@ -16,7 +20,7 @@ class RightmoveData:
     The query to rightmove can be renewed by calling the `refresh_data` method.
     """
 
-    def __init__(self, url: str, results_fpath: str):
+    def __init__(self, url: str, results_fpath: str, detail_results_fpath: str = '', detail_threaded: bool = False):
         """Initialize the scraper with a URL from the results of a property
         search performed on www.rightmove.co.uk.
 
@@ -28,10 +32,11 @@ class RightmoveData:
         self._results_fpath = results_fpath
         self._validate_url()
         self._results = self._get_results()
+        self._detail_results = self._get_detail_results(detail_results_fpath, threaded=detail_threaded)
 
     @staticmethod
     def _request(url: str):
-        r = requests.get(url)
+        r = requests.get(url, headers=UA_HEADER)
         return r.status_code, r.content
 
     def refresh_data(self, url: str = None):
@@ -76,7 +81,6 @@ class RightmoveData:
         be accessed to 42."""
         return len(self.get_results)
 
-
     @property
     def results_count_display(self):
         """Returns an integer of the total number of listings as displayed on
@@ -108,9 +112,9 @@ class RightmoveData:
 
         data_sel = '/html/body/script[5]/text()'
         script = tree.xpath(data_sel)[0]
-        data = json.loads(re.search(r"window.jsonModel = (.*?)$", script).group(1))
+        data = json.loads(
+            re.search(r"window.jsonModel = (.*?)$", script).group(1))
         return data['properties']
-
 
     def _get_results(self) -> list:
         """Build a Pandas DataFrame with all results returned by the search."""
@@ -136,3 +140,37 @@ class RightmoveData:
             json.dump(results, f)
 
         return results
+
+    def _get_detail_page(self, url: str):
+        status_code, request_content = self._request(url)
+
+        if status_code != 200:
+            return None
+
+        tree = html.fromstring(request_content)
+        data_sel = '/html/body/script[2]/text()'
+        s = tree.xpath(data_sel)[0]
+        s = s.split('window.PAGE_MODEL = ')[1]
+        s = s.split('.propertyData')[0]
+        s = s.split('window.adInfo')[0].strip()
+        data = json.loads(s)
+        return data
+
+    def _get_detail_results(self, fpath: str, threaded: bool = False) -> list:
+        if not fpath:
+            return []
+
+        urls = [DETAIL_PAGE_PART % x[PROPERTY_URL_JSON_KEY]
+                for x in self.get_results]
+
+        t1 = time.perf_counter()
+        if threaded:
+            with ThreadPoolExecutor(max_workers=12) as executor:
+                results = list(executor.map(self._get_detail_page, urls))
+        else:
+            results = [self._get_detail_page(x) for x in urls]
+        t2 = time.perf_counter()
+        print("Time taken to scrape detail: ", t2-t1)
+
+        with open(fpath, 'w') as f:
+            json.dump(results, f)
